@@ -20,6 +20,21 @@ It allows precise control of the heating process via a simple relay switch, temp
 - **Relay** to switch the kiln’s heating elements (`ON` / `OFF`)
 - **MAX31855** thermocouple amplifier to read the current kiln temperature
 - Kiln has a physical **power level knob** (potentiometer), but power is switched fully via relay (not dimmable)
+- **HW-482** Relays for overriding the ON-OFF Settings
+
+---
+
+## Debug & Development
+
+Just clone the project and have a somewhat recent version of Python 3 (3.6 and above) installed.
+
+Create a virtual environment
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
 ---
 

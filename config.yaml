@@ -1,0 +1,8 @@
+mode: mock  # oder "real"
+debug_mode: true
+
+temperature_sensor:
+  class: mocks.mock_temperature_sensor.MockTemperatureSensor
+
+relay_switch:
+  class: mocks.mock_relay_switch.MockRelaySwitch
