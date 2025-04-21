@@ -1,5 +1,5 @@
 mqtt:
-  enabled: true
+  enabled: false
   host: "127.0.0.1"
   port: 1883
   username: ""
@@ -16,3 +16,51 @@ temperature_sensor:
 
 relay_switch:
   class: mocks.mock_relay_switch.MockRelaySwitch
+
+
+programm: glasurbrand
+
+programme:
+  schruehbrand:
+    brennkurve:
+      - phase: vorlaufzeit
+        duration_minutes: 0
+
+      - phase: aufheizen
+        target_temp: 400
+        duration_minutes: 120
+
+      - phase: haltezeit
+        duration_minutes: 120
+
+      - phase: aufheizen
+        target_temp: 950
+        duration_minutes: 180
+
+      - phase: haltezeit
+        duration_minutes: 60
+
+      - phase: abkuehlen
+        cooldown_rate_c_per_h: 350
+  
+  glasurbrand:
+    brennkurve:
+      - phase: vorlaufzeit
+        duration_minutes: 0
+
+      - phase: aufheizen
+        target_temp: 400
+        duration_minutes: 120
+
+      - phase: haltezeit
+        duration_minutes: 15
+
+      - phase: aufheizen
+        target_temp: 1220
+        duration_minutes: 360
+
+      - phase: haltezeit
+        duration_minutes: 15
+
+      - phase: abkuehlen
+        cooldown_rate_c_per_h: 350

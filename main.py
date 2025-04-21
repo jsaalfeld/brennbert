@@ -3,6 +3,7 @@ import threading
 from config import load_config
 from dynamic_import import load_class
 import paho.mqtt.client as mqtt
+from brennsteuerung import BrennofenSteuerung
 
 # ---- MQTT Setup ----
 mqtt_status = {"enabled": True}
@@ -61,48 +62,28 @@ if mqtt_enabled:
 else:
     print("[MQTT] Deaktiviert laut Konfiguration.")
 
+# ---- Brennkurve laden ----
+programm_name = cfg["programm"]
+brennkurve = cfg["programme"][programm_name]["brennkurve"]
+
+# ---- Brennofensteuerung starten ----
+steuerung = BrennofenSteuerung(brennkurve, sensor, relay)
+
 print("[System] Brennofen-Regelung gestartet.")
 
 try:
-    while True:
-        if debug_mode:
-            # Debug-Modus: Instead of MQTT Signals - use your Keyboard
-            user_input = input("[Debug] Eingabe (on/off/skip, Enter = skip): ").strip().lower()
-            if user_input == "on":
-                manual_override["enabled"] = True
-            elif user_input == "off":
-                manual_override["enabled"] = False
-            elif user_input == "skip":
-                pass
-            elif user_input == "":
-                pass # Default = Skip
+    while steuerung.active:
+        steuerung.tick()
+        ist = steuerung.get_ist_temperature()
+        phase = steuerung.get_phase_name()
+        soll = steuerung.get_soll_temperature()
+        soll_text = f"{soll:.2f} °C" if soll is not None else "–"
 
-            current_enabled = manual_override["enabled"]
-        else:
-            # Normal Running Mode
-            current_enabled = mqtt_status["enabled"]
+        print(f"[Ofen] Phase: {phase:12} | Ist: {ist:.2f} °C | Soll: {soll_text}")
 
-        if current_enabled:
-            temp = sensor.read_temperature()
-            print(f"[Ofen] Temperatur: {temp} °C")
+        time.sleep(1)
 
-            if temp > 1220:
-                relay.off()
-            elif temp < 1210:
-                relay.on()
-
-            relay_status = "ON" if relay.is_on() else "OFF"
-
-            if mqtt_enabled:
-                ret = client.publish(mqtt_config["topics"]["temperature"], temp)
-                client.publish(mqtt_config["topics"]["relay_status"], relay_status)
-
-        else:
-            print("[Ofen] AUS – kein Heizbetrieb.")
-            relay.off()
-
-        time.sleep(2)
-
+    print("[Ofen] Programm beendet.")
 except KeyboardInterrupt:
     print("\n[System] Manuell beendet. Relais wird ausgeschaltet.")
     relay.off()
