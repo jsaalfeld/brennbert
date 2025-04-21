@@ -36,6 +36,21 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+To test the MQTT Capabilietes, just start a local instance of mosquitto:
+
+```bash
+mkdir -p mosquitto
+
+echo "listener 1883
+allow_anonymous true" > mosquitto/mosquitto.conf
+
+podman run -it -d --name=muecke -p 1883:1883 \
+  -v $(pwd)/mosquitto:/mosquitto/config \
+  eclipse-mosquitto
+
+podman exec -it muecke mosquitto_sub -h localhost -t "#" -v
+```
+
 ---
 
 ## Web Interface

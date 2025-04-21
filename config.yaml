@@ -1,4 +1,14 @@
-mode: mock  # oder "real"
+mqtt:
+  enabled: true
+  host: "127.0.0.1"
+  port: 1883
+  username: ""
+  password: ""
+  topics:
+    control: "brennofen/control"
+    temperature: "brennofen/temperature"
+    relay_status: "brennofen/relay_status"
+
 debug_mode: true
 
 temperature_sensor:

@@ -6,10 +6,12 @@ import paho.mqtt.client as mqtt
 
 # ---- MQTT Setup ----
 mqtt_status = {"enabled": True}
+mqtt_connected_flag = {"status": False}
 
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print(f"[MQTT] Verbunden mit Reason-Code {reason_code}")
-    client.subscribe("brennofen/control")
+    mqtt_connected_flag = {"status": True}
+    client.subscribe(mqtt_config["topics"]["control"])
 
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
@@ -36,20 +38,30 @@ relay = RelayClass()
 SensorClass = load_class(cfg["temperature_sensor"]["class"])
 sensor = SensorClass(relay)
 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
-try:
-    client.connect("localhost", 1883, 60)
-    start_mqtt_loop(client)
-except ConnectionRefusedError:
-    print("[MQTT] Verbindung fehlgeschlagen – läuft kein Broker? MQTT deaktiviert.")
-    mqtt_status["enabled"] = False
-    mqtt_enabled = False
-else:
-    mqtt_enabled = True
+mqtt_config = cfg.get("mqtt", {})
+mqtt_enabled = mqtt_config.get("enabled", False)
 
-print("[System] Brennofen-Regelung gestartet. Warten auf MQTT-Startsignal...")
+if mqtt_enabled:
+    client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
+    # Some brokers (i.e. for local testing) allow empty username and password
+    user = mqtt_config.get("username") or None
+    pw = mqtt_config.get("password") or None
+    if user and pw:
+        client.username_pw_set(user, pw)
+
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    try:
+        client.connect(mqtt_config.get("host", "localhost"), mqtt_config.get("port", 1883), 60)
+        start_mqtt_loop(client)
+    except ConnectionRefusedError:
+        print("[MQTT] Verbindung fehlgeschlagen – läuft der Broker?")
+        mqtt_enabled = False
+else:
+    print("[MQTT] Deaktiviert laut Konfiguration.")
+
+print("[System] Brennofen-Regelung gestartet.")
 
 try:
     while True:
@@ -82,8 +94,9 @@ try:
             relay_status = "ON" if relay.is_on() else "OFF"
 
             if mqtt_enabled:
-                client.publish("brennofen/temperature", temp)
-                client.publish("brennofen/relay_status", relay_status)
+                ret = client.publish(mqtt_config["topics"]["temperature"], temp)
+                client.publish(mqtt_config["topics"]["relay_status"], relay_status)
+
         else:
             print("[Ofen] AUS – kein Heizbetrieb.")
             relay.off()
