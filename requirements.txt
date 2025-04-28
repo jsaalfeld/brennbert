@@ -1,2 +1,6 @@
 paho-mqtt==2.1.0
 PyYAML==6.0.2
+adafruit-circuitpython-max31855==3.2.23
+adafruit-blinka==8.56.0
+RPi.GPIO==0.7.1
+

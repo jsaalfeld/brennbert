@@ -48,6 +48,7 @@ class BrennofenSteuerung:
         return None
 
 
+
     def _prepare_phase(self):
         if self.phase_index >= len(self.brennkurve):
             print("[Brennofen] Brennkurve abgeschlossen.")
@@ -63,8 +64,19 @@ class BrennofenSteuerung:
             self.phase_end = self.phase_start + timedelta(minutes=self.phase["duration_minutes"])
 
         elif name == "aufheizen":
+
             self.phase_end = self.phase_start + timedelta(minutes=self.phase["duration_minutes"])
-            self.start_temp = self.sensor.read_temperature()
+    
+            # Temperatur sicher auslesen
+            while True:
+                temp = self.sensor.read_temperature()
+                if temp is not None and temp > 0:
+                    self.start_temp = temp
+                    break
+                else:
+                    print("[WARN] Ungültige Starttemperatur. Warte auf gültigen Sensorwert...")
+                    time.sleep(2)  # 2 Sekunden warten und neu versuchen
+
             self.target_temp = self.phase["target_temp"]
 
         elif name == "haltezeit":
@@ -101,13 +113,13 @@ class BrennofenSteuerung:
         name = self.phase["phase"]
 
         if name in ["vorlaufzeit", "haltezeit"]:
-            self._regel_heizen(temp, self.target_temp)
+            self._regel_heizen(temp, self.target_temp, tolerance=2)
 
         elif name == "aufheizen":
             elapsed = (now - self.phase_start).total_seconds()
             total = (self.phase_end - self.phase_start).total_seconds()
             solltemp = self.start_temp + (self.target_temp - self.start_temp) * (elapsed / total)
-            self._regel_heizen(temp, solltemp)
+            self._regel_heizen(temp, solltemp, tolerance=2)
 
         elif name == "abkuehlen":
             elapsed = (now - self.phase_start).total_seconds()

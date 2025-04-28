@@ -12,11 +12,10 @@ mqtt:
 debug_mode: true
 
 temperature_sensor:
-  class: mocks.mock_temperature_sensor.MockTemperatureSensor
+  class: real_temperature_sensor.RealTemperatureSensor
 
 relay_switch:
-  class: mocks.mock_relay_switch.MockRelaySwitch
-
+  class: real_relay_switch.RealRelaySwitch
 
 programm: glasurbrand
 
