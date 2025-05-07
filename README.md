@@ -24,6 +24,55 @@ It allows precise control of the heating process via a simple relay switch, temp
 
 ---
 
+### 🧠 Raspberry Pi ↔ MAX31855
+
+| Raspberry Pi GPIO (BCM) | Physical Pin | MAX31855 Pin | Description                     |
+|--------------------------|--------------|---------------|---------------------------------|
+| 3.3V                     | Pin 1        | VCC           | Power supply for MAX31855       |
+| GND                      | Pin 6        | GND           | Ground                          |
+| GPIO11 (SCLK)            | Pin 23       | CLK           | SPI clock                       |
+| GPIO9 (MISO)             | Pin 21       | DO            | SPI data from sensor            |
+| GPIO24 (CS)              | Pin 18       | CS            | Chip select for MAX31855        |
+
+- 🧪 **Important**: The MAX31855 only works with **3.3V**, not 5V!
+- 📏 Ensure the **thermocouple wires** are connected correctly (T+ / T–).
+- A wrong polarity will give incorrect readings (e.g. stuck at 0 °C).
+
+---
+
+### ⚡ Raspberry Pi ↔ HW-482 Relay Module
+
+| Raspberry Pi GPIO (BCM) | Physical Pin | HW-482 Pin | Description                         |
+|--------------------------|--------------|-------------|-------------------------------------|
+| 5V                       | Pin 2        | VCC (+)     | Power supply for the relay module   |
+| GND                      | Pin 6        | GND (–)     | Ground                              |
+| GPIO17                   | Pin 11       | SIG (S)     | Signal pin to control the relay     |
+
+- This relay module is **active LOW**, meaning:
+  - `GPIO.LOW` → Relay **ON**
+  - `GPIO.HIGH` → Relay **OFF**
+
+---
+
+### 🔌 Relay Output (to kiln)
+
+| Relay Output | Description                          |
+|--------------|--------------------------------------|
+| COM          | 5V supply or common switching point  |
+| NO           | Connect to the kiln's control wire   |
+
+- ⚠️ Using the **NO (Normally Open)** pin is safer — the kiln is off by default when the Pi boots.
+
+---
+
+## ✅ Safe Boot Behavior
+
+- Relay is OFF (kiln disconnected) when Pi powers up
+- Relay only turns ON when explicitly activated via GPIO
+- Temperature readout is blocked until a valid sensor signal is available
+
+---
+
 ## Debug & Development
 
 Just clone the project and have a somewhat recent version of Python 3 (3.6 and above) installed.
