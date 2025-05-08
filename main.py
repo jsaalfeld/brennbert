@@ -4,6 +4,9 @@ from config import load_config
 from dynamic_import import load_class
 import paho.mqtt.client as mqtt
 from brennsteuerung import BrennofenSteuerung
+from csv_logger import CSVLogger
+
+csv_logger = CSVLogger()
 
 # ---- MQTT Setup ----
 mqtt_status = {"enabled": True}
@@ -76,6 +79,7 @@ try:
         steuerung.tick()
         ist = steuerung.get_ist_temperature()
         phase = steuerung.get_phase_name()
+        csv_logger.log(phase, ist)
         soll = steuerung.get_soll_temperature()
         soll_text = f"{soll:.2f} °C" if soll is not None else "–"
 

@@ -130,11 +130,15 @@ class BrennofenSteuerung:
             print(f"[WARN] Unbekannte Phase: {name}")
 
     def _regel_heizen(self, ist, soll, tolerance=5):
+        if ist < 0:
+            print("[TempSensor] Fehlerhafte Messung - Relais bleibt in Position")
+            return
         if soll is None:
             self.relais.off()
-        return
-
+            return
         if ist < soll - tolerance:
-            self.relais.on()
+            if not self.relais.is_on():
+                self.relais.on()
         elif ist > soll + tolerance:
-            self.relais.off()
+            if self.relais.is_on():
+                self.relais.off()

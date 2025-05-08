@@ -15,17 +15,20 @@ class RealRelaySwitch(RelaySwitch):
         self._is_on = False
 
     def on(self):
-        GPIO.output(self.relay_pin, GPIO.LOW)  # AN = GPIO.LOW
+        GPIO.output(self.relay_pin, GPIO.HIGH)  # AN = GPIO.LOW
+        print("[Relay] Einschalten")
         self._is_on = True
 
     def off(self):
-        GPIO.output(self.relay_pin, GPIO.HIGH)  # AUS = GPIO.HIGH
+        GPIO.output(self.relay_pin, GPIO.LOW)  # AUS = GPIO.HIGH
+        print("[Relay] Ausschalten")
         self._is_on = False
 
     def is_on(self) -> bool:
         return self._is_on
 
     def cleanup(self):
-        GPIO.output(self.relay_pin, GPIO.HIGH)
+        GPIO.output(self.relay_pin, GPIO.LOW)
+        sleep(2)
         GPIO.cleanup()
 
