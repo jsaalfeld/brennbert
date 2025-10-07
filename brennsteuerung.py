@@ -106,9 +106,19 @@ class BrennofenSteuerung:
         temp = self.sensor.read_temperature()
 
         if now >= self.phase_end:
-            self.phase_index += 1
-            self._prepare_phase()
-            return
+            if self.phase.get("wait_until_reached"):
+                # Temperatur erreicht?
+                if temp >= self.target_temp - 2:
+                    print("[Phase] Zieltemperatur erreicht – weiter zur nächsten Phase.")
+                    self.phase_index += 1
+                    self._prepare_phase()
+                    return
+                else:
+                    print(f"[Phase] Zieltemperatur ({self.target_temp}°C) noch nicht erreicht.")
+            else:
+                self.phase_index += 1
+                self._prepare_phase()
+                return
 
         name = self.phase["phase"]
 

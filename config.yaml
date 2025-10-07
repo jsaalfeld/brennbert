@@ -17,7 +17,7 @@ temperature_sensor:
 relay_switch:
   class: real_relay_switch.RealRelaySwitch
 
-programm: glasurbrand
+programm: glasurbrand 
 
 programme:
   schruehbrand:
@@ -30,7 +30,7 @@ programme:
         duration_minutes: 120
 
       - phase: haltezeit
-        duration_minutes: 120
+        duration_minutes: 60
 
       - phase: aufheizen
         target_temp: 950
@@ -48,18 +48,24 @@ programme:
         duration_minutes: 0
 
       - phase: aufheizen
-        target_temp: 400
+        target_temp: 550
         duration_minutes: 120
+        wait_until_reached: true
 
       - phase: haltezeit
         duration_minutes: 15
 
       - phase: aufheizen
-        target_temp: 1220
-        duration_minutes: 360
+        target_temp: 1162
+        duration_minutes: 400
+        wait_until_reached: true
+
+      - phase: aufheizen
+        target_temp: 1164
+        duration_minutes: 20
 
       - phase: haltezeit
-        duration_minutes: 15
+        duration_minutes: 20
 
       - phase: abkuehlen
         cooldown_rate_c_per_h: 350
